@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 // App.css holds all of our styles. Importing it here tells Vite to include it.
 import "./App.css";
 import SearchBar from "./components/SearchBar.jsx";
@@ -6,12 +6,28 @@ import UserProfile from "./components/UserProfile.jsx";
 import RepoList from "./components/RepoList.jsx";
 import Loader from "./components/Loader.jsx";
 import ErrorMessage from "./components/ErrorMessage.jsx";
+import RecentSearches from "./components/RecentSearches.jsx";
 import { getProfile, getRepos } from "./api.js";
 
 // GitHub returns up to this many repos per page (our backend asks for 30).
 // We use it to decide whether there might be another page to load: if a page
 // comes back full, there may be more; if it's short, we've reached the end.
 const PER_PAGE = 30;
+
+// Settings for the "recently searched" list saved in the browser.
+const RECENT_KEY = "recentSearches"; // the localStorage key we store under
+const MAX_RECENT = 5; // keep only the last few searches
+
+// Read the recent searches from localStorage. We guard with try/catch because
+// localStorage can be unavailable (private mode) or hold corrupted data.
+function loadRecent() {
+  try {
+    const stored = localStorage.getItem(RECENT_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+}
 
 // Return a NEW array of repos sorted by the chosen option. We sort on the
 // client (in the browser) because we already have all the repos, so there's
@@ -57,6 +73,31 @@ export default function App() {
   // request is currently running (used to disable the button).
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  // Recently searched usernames. The function form of useState runs once, on
+  // first render, to load the saved list from localStorage.
+  const [recent, setRecent] = useState(() => loadRecent());
+
+  // Whenever the recent list changes, save it back to localStorage so it
+  // survives a page refresh. This is what useEffect is for: running a side
+  // effect (writing to storage) after a render.
+  useEffect(() => {
+    try {
+      localStorage.setItem(RECENT_KEY, JSON.stringify(recent));
+    } catch {
+      // Ignore write failures; this feature is a nice-to-have, not critical.
+    }
+  }, [recent]);
+
+  // Add a username to the front of the recent list, removing any duplicate
+  // (case-insensitive) and keeping only the most recent few.
+  function rememberSearch(name) {
+    setRecent((current) => {
+      const withoutDup = current.filter(
+        (u) => u.toLowerCase() !== name.toLowerCase()
+      );
+      return [name, ...withoutDup].slice(0, MAX_RECENT);
+    });
+  }
 
   // Runs when the user submits a username in the search bar.
   async function handleSearch(name) {
@@ -75,6 +116,9 @@ export default function App() {
       setPage(1);
       // A full page means there may be more pages to load.
       setHasMore(reposData.length === PER_PAGE);
+      // Only remember searches that worked. Use the profile's login so the
+      // casing is the official one GitHub uses.
+      rememberSearch(profileData.login);
     } catch (err) {
       // Show the error and clear any old results so we don't show stale data
       // next to the error message.
@@ -124,6 +168,9 @@ export default function App() {
 
       <main className="app-main">
         <SearchBar onSearch={handleSearch} />
+
+        {/* Clicking a recent username runs the same search again. */}
+        <RecentSearches items={recent} onSelect={handleSearch} />
 
         {/* The UI shows exactly one main outcome at a time, decided by state. */}
         {loading && <Loader />}
