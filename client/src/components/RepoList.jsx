@@ -1,11 +1,31 @@
 import RepoCard from "./RepoCard.jsx";
 
-// Renders the list of repositories. It receives the repos array as a prop and
-// turns each repo into a RepoCard.
-export default function RepoList({ repos }) {
+// Renders the repositories: a header with a sort dropdown, then the list.
+// It receives the already-sorted repos plus the current sort value and a
+// function to call when the user changes it. App owns that state; this
+// component just shows it and reports changes back up.
+export default function RepoList({ repos, sort, onSortChange }) {
   return (
     <section>
-      <h3 className="repo-list-title">Repositories</h3>
+      <div className="repo-list-header">
+        <h3 className="repo-list-title">Repositories</h3>
+
+        {/* Wrapping the select in a <label> means clicking "Sort by" focuses
+            the dropdown, which is good for accessibility. */}
+        <label className="sort-control">
+          <span>Sort by</span>
+          <select
+            className="sort-select"
+            value={sort}
+            onChange={(event) => onSortChange(event.target.value)}
+          >
+            <option value="stars">Most stars</option>
+            <option value="name">Name (A–Z)</option>
+            <option value="updated">Recently updated</option>
+          </select>
+        </label>
+      </div>
+
       <ul className="repo-list">
         {repos.map((repo) => (
           // React needs a stable, unique "key" for each item in a list so it
