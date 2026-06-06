@@ -35,6 +35,29 @@ app.get("/api/health", (req, res) => {
 // (for example /api/github/torvalds).
 app.use("/api/github", githubRouter);
 
+// --- Central error handler ---
+// Express treats a middleware with FOUR arguments as an error handler.
+// Whenever a route calls next(err), the request ends up here, so every
+// error response is defined in this one place instead of in each route.
+// (The `next` argument is unused but must be present for Express to
+// recognise this as an error handler.)
+app.use((err, req, res, next) => {
+  // The requested user doesn't exist on GitHub.
+  if (err.code === "not_found") {
+    return res.status(404).json({ error: "User not found" });
+  }
+
+  // We've hit GitHub's rate limit; ask the user to try again soon.
+  if (err.code === "rate_limit") {
+    return res
+      .status(429)
+      .json({ error: "GitHub rate limit reached, please try again shortly" });
+  }
+
+  // Anything else: a network problem or an unexpected GitHub response.
+  return res.status(502).json({ error: "Could not reach GitHub" });
+});
+
 // Start the server and listen for requests. The callback runs once it's ready.
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

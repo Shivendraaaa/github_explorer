@@ -9,7 +9,7 @@ import { get, set } from "../utils/cache.js";
 const router = Router();
 
 // GET /api/github/:username  ->  the user's public profile.
-router.get("/:username", async (req, res) => {
+router.get("/:username", async (req, res, next) => {
   try {
     // Use the full request path as the cache key, e.g. "/api/github/torvalds".
     const key = req.originalUrl;
@@ -29,19 +29,14 @@ router.get("/:username", async (req, res) => {
     res.set("x-cache", "MISS");
     res.json(profile);
   } catch (err) {
-    // For now we handle errors right here so the route works on its own.
-    // In a later step we'll move this into one central error handler that
-    // both routes share, so we don't repeat ourselves.
-    if (err.status === 404) {
-      res.status(404).json({ error: "User not found" });
-    } else {
-      res.status(502).json({ error: "Could not reach GitHub" });
-    }
+    // Hand the error to the central error handler in index.js, which turns
+    // it into the correct status code and message.
+    next(err);
   }
 });
 
 // GET /api/github/:username/repos?page=1  ->  one page of public repos.
-router.get("/:username/repos", async (req, res) => {
+router.get("/:username/repos", async (req, res, next) => {
   try {
     // The cache key is the full path including the page, so each page is
     // cached separately, e.g. "/api/github/torvalds/repos?page=2".
@@ -61,12 +56,8 @@ router.get("/:username/repos", async (req, res) => {
     res.set("x-cache", "MISS");
     res.json(repos);
   } catch (err) {
-    // Same error handling as above. We'll centralize this in a later step.
-    if (err.status === 404) {
-      res.status(404).json({ error: "User not found" });
-    } else {
-      res.status(502).json({ error: "Could not reach GitHub" });
-    }
+    // Hand the error to the central error handler in index.js.
+    next(err);
   }
 });
 

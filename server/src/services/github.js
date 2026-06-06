@@ -22,6 +22,32 @@ function githubHeaders() {
   return headers;
 }
 
+// Build a clearly labelled error from a failed GitHub response. The "code"
+// lets our central error handler (in index.js) decide which status code and
+// message to send back to the browser.
+function githubError(res) {
+  // GitHub signals rate limiting with a 403 or 429 plus a header saying
+  // zero requests remain. We check both to be sure it's really the limit.
+  const remaining = res.headers.get("x-ratelimit-remaining");
+  if ((res.status === 403 || res.status === 429) && remaining === "0") {
+    const error = new Error("GitHub rate limit reached");
+    error.code = "rate_limit";
+    return error;
+  }
+
+  // The requested user (or path) does not exist on GitHub.
+  if (res.status === 404) {
+    const error = new Error("Not found on GitHub");
+    error.code = "not_found";
+    return error;
+  }
+
+  // Any other non-success response from GitHub.
+  const error = new Error(`GitHub responded with ${res.status}`);
+  error.code = "github_error";
+  return error;
+}
+
 // Fetch one user's public profile from GitHub.
 export async function getUser(username) {
   // `fetch` is built into Node 18+, so we don't need a library like axios.
@@ -29,13 +55,10 @@ export async function getUser(username) {
     headers: githubHeaders(),
   });
 
-  // If GitHub did not return a success status (e.g. 404 for a missing
-  // user), throw an error. We attach the status code so whoever calls
-  // this function can tell a "not found" apart from other failures.
+  // If GitHub did not return a success status, throw a labelled error so
+  // the central error handler can turn it into the right response.
   if (!res.ok) {
-    const error = new Error(`GitHub responded with ${res.status}`);
-    error.status = res.status;
-    throw error;
+    throw githubError(res);
   }
 
   // GitHub sends back many fields. We keep only the ones the frontend
@@ -59,12 +82,9 @@ export async function getRepos(username, page = 1) {
   const url = `${GITHUB_API}/users/${username}/repos?per_page=30&page=${page}`;
   const res = await fetch(url, { headers: githubHeaders() });
 
-  // Same error handling as getUser: if GitHub fails, throw with the
-  // status code so the route knows whether it was a 404 or something else.
+  // Same labelled-error handling as getUser.
   if (!res.ok) {
-    const error = new Error(`GitHub responded with ${res.status}`);
-    error.status = res.status;
-    throw error;
+    throw githubError(res);
   }
 
   // This endpoint returns an array of repos. We map over it and keep only
