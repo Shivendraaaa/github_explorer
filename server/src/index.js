@@ -5,6 +5,8 @@ import express from "express";
 // port (e.g. 5173) than this server (e.g. 3001). Browsers block requests
 // between different origins by default, so we enable CORS to allow them.
 import cors from "cors";
+// Our GitHub routes, kept in their own file to keep this one tidy.
+import githubRouter from "./routes/github.js";
 
 // The port to listen on. Hosting platforms (like Render) provide a PORT
 // environment variable; locally we fall back to 3001.
@@ -28,6 +30,10 @@ app.use(express.json());
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok" });
 });
+
+// All GitHub-related routes live under /api/github
+// (for example /api/github/torvalds).
+app.use("/api/github", githubRouter);
 
 // Start the server and listen for requests. The callback runs once it's ready.
 app.listen(PORT, () => {
