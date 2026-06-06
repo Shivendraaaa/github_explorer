@@ -1,11 +1,27 @@
-// App.css holds all of our styles. Importing it here tells Vite to include
-// it in the page.
+import { useState } from "react";
+// App.css holds all of our styles. Importing it here tells Vite to include it.
 import "./App.css";
+import SearchBar from "./components/SearchBar.jsx";
+import { getProfile } from "./api.js";
 
-// App is the top-level component of the whole frontend. Right now it's just
-// the page "shell": a header with the title, and an empty main area where
-// the search bar, profile, and repo list will go in the next steps.
+// App is the top-level component. It owns the app's state and decides what to
+// render. For now it holds the fetched profile and wires up the search bar.
 export default function App() {
+  // The profile returned by our backend. null means "no search yet".
+  const [profile, setProfile] = useState(null);
+
+  // Runs when the user submits a username in the search bar.
+  async function handleSearch(username) {
+    try {
+      const data = await getProfile(username);
+      setProfile(data);
+    } catch (error) {
+      // A proper on-screen error message is added in a later step. For now we
+      // just log it so a failed search doesn't break anything.
+      console.error(error);
+    }
+  }
+
   return (
     <div className="app">
       <header className="app-header">
@@ -16,7 +32,17 @@ export default function App() {
       </header>
 
       <main className="app-main">
-        {/* Search bar, profile, and repo list will be added here. */}
+        <SearchBar onSearch={handleSearch} />
+
+        {/* Temporary check that the round-trip to our backend works. In the
+            next step we replace this with a proper profile card and add
+            loading and error states. */}
+        {profile && (
+          <p>
+            Found: <strong>{profile.login}</strong> ({profile.public_repos}{" "}
+            public repos)
+          </p>
+        )}
       </main>
     </div>
   );
