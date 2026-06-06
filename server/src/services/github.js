@@ -51,3 +51,35 @@ export async function getUser(username) {
     public_repos: data.public_repos,
   };
 }
+
+// Fetch one page of a user's public repositories from GitHub.
+// GitHub returns 30 repos per page by default; we ask for a specific
+// page so the frontend can show a "load more" button.
+export async function getRepos(username, page = 1) {
+  const url = `${GITHUB_API}/users/${username}/repos?per_page=30&page=${page}`;
+  const res = await fetch(url, { headers: githubHeaders() });
+
+  // Same error handling as getUser: if GitHub fails, throw with the
+  // status code so the route knows whether it was a 404 or something else.
+  if (!res.ok) {
+    const error = new Error(`GitHub responded with ${res.status}`);
+    error.status = res.status;
+    throw error;
+  }
+
+  // This endpoint returns an array of repos. We map over it and keep only
+  // the fields the frontend needs for each repo (including open_issues_count
+  // and default_branch, which the UI shows when a repo card is expanded).
+  const data = await res.json();
+  return data.map((repo) => ({
+    id: repo.id,
+    name: repo.name,
+    description: repo.description,
+    language: repo.language,
+    stargazers_count: repo.stargazers_count,
+    updated_at: repo.updated_at,
+    open_issues_count: repo.open_issues_count,
+    default_branch: repo.default_branch,
+    html_url: repo.html_url,
+  }));
+}
