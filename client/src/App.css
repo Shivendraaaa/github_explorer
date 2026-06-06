@@ -296,6 +296,8 @@ body {
 }
 
 .repo-name {
+  min-width: 0; /* let long names shrink/wrap instead of overflowing the row */
+  overflow-wrap: anywhere;
   font-weight: 600;
   font-size: 1.05rem;
 }
@@ -428,6 +430,69 @@ body {
 }
 
 /* ---------------------------------------------------------------------------
+   Interactive polish
+   Smooth transitions plus clear, consistent focus and hover states across the
+   clickable controls. Keeping them together makes the behaviour uniform.
+   --------------------------------------------------------------------------- */
+
+/* Animate colour, border and shadow changes so hover/focus feel smooth rather
+   than snapping instantly. */
+.search-input,
+.search-button,
+.sort-select,
+.repo-card,
+.repo-header,
+.load-more,
+.recent-item {
+  transition: border-color 0.15s ease, background-color 0.15s ease,
+    box-shadow 0.15s ease, color 0.15s ease;
+}
+
+/* A visible focus ring for keyboard users. :focus-visible shows it only during
+   keyboard navigation (not after a mouse click), so it never feels noisy. */
+.search-button:focus-visible,
+.sort-select:focus-visible,
+.repo-header:focus-visible,
+.load-more:focus-visible,
+.recent-item:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Lift a repo card slightly on hover to hint that it's interactive. */
+.repo-card:hover {
+  border-color: var(--color-accent);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* A tiny "press" effect on the main buttons. */
+.search-button:active,
+.load-more:active {
+  transform: translateY(1px);
+}
+
+/* Links use the accent colour, and underline on hover for clarity. */
+a {
+  color: var(--color-accent);
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Respect users who ask for less motion: effectively turn off the pulse
+   animation and the transitions above. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
    Small screens
    On phones, shrink the heading and padding slightly so nothing feels
    cramped.
@@ -450,5 +515,10 @@ body {
 
   .profile-stats {
     justify-content: center;
+  }
+
+  /* A little less horizontal padding inside cards on small screens. */
+  .repo-card {
+    padding: var(--space-md);
   }
 }
