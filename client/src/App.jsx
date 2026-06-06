@@ -7,6 +7,7 @@ import RepoList from "./components/RepoList.jsx";
 import Loader from "./components/Loader.jsx";
 import ErrorMessage from "./components/ErrorMessage.jsx";
 import RecentSearches from "./components/RecentSearches.jsx";
+import ThemeToggle from "./components/ThemeToggle.jsx";
 import { getProfile, getRepos } from "./api.js";
 
 // GitHub returns up to this many repos per page (our backend asks for 30).
@@ -17,6 +18,7 @@ const PER_PAGE = 30;
 // Settings for the "recently searched" list saved in the browser.
 const RECENT_KEY = "recentSearches"; // the localStorage key we store under
 const MAX_RECENT = 5; // keep only the last few searches
+const THEME_KEY = "theme"; // localStorage key for the chosen colour theme
 
 // Read the recent searches from localStorage. We guard with try/catch because
 // localStorage can be unavailable (private mode) or hold corrupted data.
@@ -27,6 +29,20 @@ function loadRecent() {
   } catch {
     return [];
   }
+}
+
+// Read the saved theme. If there isn't one, fall back to whatever the user's
+// operating system prefers (light or dark).
+function loadTheme() {
+  try {
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved === "light" || saved === "dark") return saved;
+  } catch {
+    // ignore and fall through to the system preference
+  }
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
 }
 
 // Return a NEW array of repos sorted by the chosen option. We sort on the
@@ -76,6 +92,8 @@ export default function App() {
   // Recently searched usernames. The function form of useState runs once, on
   // first render, to load the saved list from localStorage.
   const [recent, setRecent] = useState(() => loadRecent());
+  // The current colour theme: "light" or "dark".
+  const [theme, setTheme] = useState(() => loadTheme());
 
   // Whenever the recent list changes, save it back to localStorage so it
   // survives a page refresh. This is what useEffect is for: running a side
@@ -87,6 +105,22 @@ export default function App() {
       // Ignore write failures; this feature is a nice-to-have, not critical.
     }
   }, [recent]);
+
+  // Apply the theme to the <html> element so our CSS can react to it, and save
+  // the choice so it sticks across page refreshes.
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    try {
+      localStorage.setItem(THEME_KEY, theme);
+    } catch {
+      // ignore write failures
+    }
+  }, [theme]);
+
+  // Flip between light and dark.
+  function toggleTheme() {
+    setTheme((current) => (current === "dark" ? "light" : "dark"));
+  }
 
   // Add a username to the front of the recent list, removing any duplicate
   // (case-insensitive) and keeping only the most recent few.
@@ -159,6 +193,10 @@ export default function App() {
 
   return (
     <div className="app">
+      <div className="app-topbar">
+        <ThemeToggle theme={theme} onToggle={toggleTheme} />
+      </div>
+
       <header className="app-header">
         <h1 className="app-title">GitHub Repo Explorer</h1>
         <p className="app-subtitle">
