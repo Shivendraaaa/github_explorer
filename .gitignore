@@ -1,0 +1,11 @@
+# Dependencies installed by npm. These are large and machine-specific,
+# so we install them fresh with `npm install` instead of committing them.
+node_modules/
+
+# Secret environment variables (API tokens, port numbers).
+# Keeping this out of git stops secrets from leaking into the repo.
+.env
+
+# Production build output created by Vite. It is generated from source,
+# so there is no reason to track it.
+dist/
