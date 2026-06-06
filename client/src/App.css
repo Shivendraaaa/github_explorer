@@ -1,0 +1,97 @@
+/* ---------------------------------------------------------------------------
+   Design tokens
+   These CSS variables are reused throughout the app. Defining colours,
+   spacing, etc. in one place keeps the look consistent: change a value here
+   and it updates everywhere.
+   --------------------------------------------------------------------------- */
+:root {
+  /* Colours */
+  --color-bg: #f6f8fa;
+  --color-surface: #ffffff;
+  --color-border: #d0d7de;
+  --color-text: #1f2328;
+  --color-muted: #656d76;
+  --color-accent: #0969da;
+  --color-accent-hover: #0860c9;
+
+  /* A spacing scale, so gaps and padding stay consistent */
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+
+  /* Other shared values */
+  --radius: 10px;
+  --max-width: 820px;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* ---------------------------------------------------------------------------
+   Global reset
+   A few sensible defaults so the page starts from a clean, consistent base.
+   --------------------------------------------------------------------------- */
+* {
+  /* Make padding and borders count inside an element's set width, which
+     makes sizing far easier to reason about. */
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font);
+  line-height: 1.5;
+}
+
+/* ---------------------------------------------------------------------------
+   Page shell
+   A single centred column. max-width stops it from stretching too wide on
+   large monitors, while margin: 0 auto keeps it centred. The padding gives
+   breathing room on small screens. This combination is what makes the
+   layout responsive without any extra work.
+   --------------------------------------------------------------------------- */
+.app {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--space-xl) var(--space-md);
+}
+
+.app-header {
+  text-align: center;
+  margin-bottom: var(--space-xl);
+}
+
+.app-title {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.app-subtitle {
+  margin: var(--space-xs) 0 0;
+  color: var(--color-muted);
+}
+
+/* The main area stacks its children vertically with a consistent gap. */
+.app-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+/* ---------------------------------------------------------------------------
+   Small screens
+   On phones, shrink the heading and padding slightly so nothing feels
+   cramped.
+   --------------------------------------------------------------------------- */
+@media (max-width: 600px) {
+  .app {
+    padding: var(--space-lg) var(--space-sm);
+  }
+
+  .app-title {
+    font-size: 1.6rem;
+  }
+}
