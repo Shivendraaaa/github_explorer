@@ -339,6 +339,31 @@ body {
 }
 
 /* ---------------------------------------------------------------------------
+   Load more button
+   align-self: center keeps it centred inside the vertical .app-main column.
+   --------------------------------------------------------------------------- */
+.load-more {
+  align-self: center;
+  padding: var(--space-sm) var(--space-xl);
+  font: inherit;
+  color: var(--color-accent);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.load-more:hover {
+  border-color: var(--color-accent);
+}
+
+/* Dimmed and non-interactive while a load is in progress. */
+.load-more:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+/* ---------------------------------------------------------------------------
    Small screens
    On phones, shrink the heading and padding slightly so nothing feels
    cramped.
