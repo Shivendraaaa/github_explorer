@@ -3,14 +3,17 @@ import { useState } from "react";
 import "./App.css";
 import SearchBar from "./components/SearchBar.jsx";
 import UserProfile from "./components/UserProfile.jsx";
+import RepoList from "./components/RepoList.jsx";
 import Loader from "./components/Loader.jsx";
-import { getProfile } from "./api.js";
+import { getProfile, getRepos } from "./api.js";
 
 // App is the top-level component. It owns the app's state and decides what to
 // render based on that state.
 export default function App() {
   // The profile returned by our backend. null means "no search yet".
   const [profile, setProfile] = useState(null);
+  // The list of repositories for the searched user. Starts as an empty array.
+  const [repos, setRepos] = useState([]);
   // True while we're waiting for the backend to respond.
   const [loading, setLoading] = useState(false);
 
@@ -18,8 +21,14 @@ export default function App() {
   async function handleSearch(username) {
     setLoading(true);
     try {
-      const data = await getProfile(username);
-      setProfile(data);
+      // Ask for the profile and the first page of repos at the same time
+      // (in parallel), so the user waits for one round-trip instead of two.
+      const [profileData, reposData] = await Promise.all([
+        getProfile(username),
+        getRepos(username),
+      ]);
+      setProfile(profileData);
+      setRepos(reposData);
     } catch (error) {
       // A proper on-screen error message is added in a later step. For now we
       // just log it so a failed search doesn't break anything.
@@ -42,10 +51,11 @@ export default function App() {
       <main className="app-main">
         <SearchBar onSearch={handleSearch} />
 
-        {/* While waiting, show the loading skeleton. Once we have a profile
-            (and are no longer loading), show the profile card. */}
+        {/* While waiting, show the loading skeleton. Otherwise show the
+            profile card and the repo list once we have them. */}
         {loading && <Loader />}
         {!loading && profile && <UserProfile profile={profile} />}
+        {!loading && repos.length > 0 && <RepoList repos={repos} />}
       </main>
     </div>
   );

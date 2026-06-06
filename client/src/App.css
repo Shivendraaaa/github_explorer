@@ -219,6 +219,96 @@ body {
 }
 
 /* ---------------------------------------------------------------------------
+   Repository list and cards
+   --------------------------------------------------------------------------- */
+.repo-list-title {
+  margin: 0 0 var(--space-md);
+  font-size: 1.2rem;
+}
+
+.repo-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin: 0;
+  padding: 0;
+  list-style: none; /* remove default bullet points */
+}
+
+.repo-card {
+  padding: var(--space-md) var(--space-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+/* The clickable header is a <button>, so we strip the default button styling
+   to make it sit flush inside the card and use the page's font. */
+.repo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  color: var(--color-accent);
+  text-align: left;
+}
+
+.repo-name {
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.repo-stars {
+  flex-shrink: 0;
+  color: var(--color-muted);
+}
+
+.repo-description {
+  margin: var(--space-sm) 0 0;
+  color: var(--color-text);
+}
+
+.repo-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  margin-top: var(--space-sm);
+  font-size: 0.9rem;
+  color: var(--color-muted);
+}
+
+.repo-language {
+  color: var(--color-text);
+}
+
+/* The expanded details: a definition list laid out in a wrapping row. */
+.repo-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-lg);
+  margin: var(--space-md) 0 0;
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-border);
+}
+
+.repo-details dt {
+  font-size: 0.8rem;
+  color: var(--color-muted);
+}
+
+.repo-details dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------------------------------
    Small screens
    On phones, shrink the heading and padding slightly so nothing feels
    cramped.
