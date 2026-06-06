@@ -17,8 +17,12 @@ const app = express();
 
 // --- Middleware: small functions that run on every incoming request ---
 
-// Allow the browser frontend to call this API from its own origin.
-app.use(cors());
+// Allow the browser frontend to call this API.
+// In production we set CLIENT_ORIGIN to the deployed frontend's URL, so only
+// that site is allowed. In development CLIENT_ORIGIN is unset, so `|| true`
+// lets cors reflect any origin, which keeps local work simple.
+const clientOrigin = process.env.CLIENT_ORIGIN;
+app.use(cors({ origin: clientOrigin || true }));
 // Parse incoming JSON request bodies and put the result on `req.body`.
 // We don't need it yet, but it's standard for an API and harmless here.
 app.use(express.json());

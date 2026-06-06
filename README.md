@@ -134,6 +134,12 @@ github_explorer/
 └── README.md
 ```
 
+## Deployment
+
+The frontend deploys to Vercel and the backend to Render. See
+[DEPLOYMENT.md](DEPLOYMENT.md) for step-by-step instructions and the
+environment variables each side needs.
+
 ## Next steps
 
 Things intentionally left out to keep the scope focused, and what I'd do next:

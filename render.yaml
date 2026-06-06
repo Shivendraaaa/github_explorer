@@ -1,0 +1,18 @@
+# Render Blueprint for the backend (https://render.com).
+# You can connect this file as a "Blueprint", or just set the same values by
+# hand when creating a Web Service in the Render dashboard.
+services:
+  - type: web
+    name: github-explorer-server
+    runtime: node
+    rootDir: server # the backend lives in the server/ folder
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      # sync: false means "I'll set this secret in the dashboard, don't store
+      # it in git". Render provides PORT automatically, so it isn't listed.
+      - key: CLIENT_ORIGIN
+        sync: false
+      - key: GITHUB_TOKEN
+        sync: false
