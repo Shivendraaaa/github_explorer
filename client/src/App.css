@@ -14,6 +14,11 @@
   --color-accent: #0969da;
   --color-accent-hover: #0860c9;
 
+  /* Danger colours, used for error messages */
+  --color-danger: #cf222e;
+  --color-danger-bg: #ffebe9;
+  --color-danger-border: #ffc1bc;
+
   /* A spacing scale, so gaps and padding stay consistent */
   --space-xs: 0.5rem;
   --space-sm: 0.75rem;
@@ -361,6 +366,25 @@ body {
 .load-more:disabled {
   cursor: default;
   opacity: 0.6;
+}
+
+/* ---------------------------------------------------------------------------
+   Error and empty states
+   --------------------------------------------------------------------------- */
+.error-message {
+  margin: 0;
+  padding: var(--space-md) var(--space-lg);
+  color: var(--color-danger);
+  background: var(--color-danger-bg);
+  border: 1px solid var(--color-danger-border);
+  border-radius: var(--radius);
+}
+
+.empty-message {
+  margin: 0;
+  padding: var(--space-lg);
+  text-align: center;
+  color: var(--color-muted);
 }
 
 /* ---------------------------------------------------------------------------

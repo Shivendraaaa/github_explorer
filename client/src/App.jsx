@@ -5,6 +5,7 @@ import SearchBar from "./components/SearchBar.jsx";
 import UserProfile from "./components/UserProfile.jsx";
 import RepoList from "./components/RepoList.jsx";
 import Loader from "./components/Loader.jsx";
+import ErrorMessage from "./components/ErrorMessage.jsx";
 import { getProfile, getRepos } from "./api.js";
 
 // GitHub returns up to this many repos per page (our backend asks for 30).
@@ -44,6 +45,8 @@ export default function App() {
   const [repos, setRepos] = useState([]);
   // True while we're waiting for the first search to respond.
   const [loading, setLoading] = useState(false);
+  // An error message to show the user. Empty string means "no error".
+  const [error, setError] = useState("");
   // Which sort order the user has picked. Default to "stars".
   const [sort, setSort] = useState("stars");
   // Remember the searched username and the current page so "Load more" knows
@@ -58,6 +61,7 @@ export default function App() {
   // Runs when the user submits a username in the search bar.
   async function handleSearch(name) {
     setLoading(true);
+    setError(""); // clear any error from a previous search
     setUsername(name);
     try {
       // Ask for the profile and the first page of repos at the same time
@@ -71,10 +75,13 @@ export default function App() {
       setPage(1);
       // A full page means there may be more pages to load.
       setHasMore(reposData.length === PER_PAGE);
-    } catch (error) {
-      // A proper on-screen error message is added in a later step. For now we
-      // just log it so a failed search doesn't break anything.
-      console.error(error);
+    } catch (err) {
+      // Show the error and clear any old results so we don't show stale data
+      // next to the error message.
+      setError(err.message);
+      setProfile(null);
+      setRepos([]);
+      setHasMore(false);
     } finally {
       // Whether it succeeded or failed, we're no longer loading.
       setLoading(false);
@@ -85,6 +92,7 @@ export default function App() {
   async function handleLoadMore() {
     const nextPage = page + 1;
     setLoadingMore(true);
+    setError("");
     try {
       const more = await getRepos(username, nextPage);
       // Add the new repos onto the end of the list we already have. Using the
@@ -93,8 +101,9 @@ export default function App() {
       setRepos((current) => [...current, ...more]);
       setPage(nextPage);
       setHasMore(more.length === PER_PAGE);
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      // Keep the repos we already loaded, but show what went wrong.
+      setError(err.message);
     } finally {
       setLoadingMore(false);
     }
@@ -116,17 +125,25 @@ export default function App() {
       <main className="app-main">
         <SearchBar onSearch={handleSearch} />
 
-        {/* While waiting, show the loading skeleton. Otherwise show the
-            profile card and the repo list once we have them. */}
+        {/* The UI shows exactly one main outcome at a time, decided by state. */}
         {loading && <Loader />}
-        {!loading && profile && <UserProfile profile={profile} />}
-        {!loading && repos.length > 0 && (
+
+        {!loading && error && <ErrorMessage message={error} />}
+
+        {!loading && !error && profile && <UserProfile profile={profile} />}
+
+        {/* User found, but they have no public repos. */}
+        {!loading && !error && profile && repos.length === 0 && (
+          <p className="empty-message">This user has no public repositories.</p>
+        )}
+
+        {!loading && !error && repos.length > 0 && (
           <RepoList repos={sortedRepos} sort={sort} onSortChange={setSort} />
         )}
 
         {/* Show "Load more" only when there may be another page. The button
             disables itself while a load is in progress. */}
-        {!loading && hasMore && (
+        {!loading && !error && hasMore && (
           <button
             className="load-more"
             onClick={handleLoadMore}

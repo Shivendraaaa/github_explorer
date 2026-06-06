@@ -10,11 +10,19 @@ const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3001";
 // A small shared helper that does one GET request and returns the JSON.
 // Our backend always replies with JSON, even for errors (e.g. { error: ... }).
 async function request(path) {
-  const res = await fetch(`${API_BASE}${path}`);
+  let res;
+  try {
+    res = await fetch(`${API_BASE}${path}`);
+  } catch {
+    // fetch only rejects when the request can't be made at all, e.g. our
+    // backend is down or there's no internet. Give a friendly message.
+    throw new Error("Could not reach the server. Please try again.");
+  }
+
   const data = await res.json();
 
   // If the backend returned an error status, throw with its message so the
-  // calling code (and later the UI) can show something useful to the user.
+  // calling code (and the UI) can show something useful to the user.
   if (!res.ok) {
     throw new Error(data.error || "Something went wrong");
   }
