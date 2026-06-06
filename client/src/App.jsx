@@ -2,16 +2,21 @@ import { useState } from "react";
 // App.css holds all of our styles. Importing it here tells Vite to include it.
 import "./App.css";
 import SearchBar from "./components/SearchBar.jsx";
+import UserProfile from "./components/UserProfile.jsx";
+import Loader from "./components/Loader.jsx";
 import { getProfile } from "./api.js";
 
 // App is the top-level component. It owns the app's state and decides what to
-// render. For now it holds the fetched profile and wires up the search bar.
+// render based on that state.
 export default function App() {
   // The profile returned by our backend. null means "no search yet".
   const [profile, setProfile] = useState(null);
+  // True while we're waiting for the backend to respond.
+  const [loading, setLoading] = useState(false);
 
   // Runs when the user submits a username in the search bar.
   async function handleSearch(username) {
+    setLoading(true);
     try {
       const data = await getProfile(username);
       setProfile(data);
@@ -19,6 +24,9 @@ export default function App() {
       // A proper on-screen error message is added in a later step. For now we
       // just log it so a failed search doesn't break anything.
       console.error(error);
+    } finally {
+      // Whether it succeeded or failed, we're no longer loading.
+      setLoading(false);
     }
   }
 
@@ -34,15 +42,10 @@ export default function App() {
       <main className="app-main">
         <SearchBar onSearch={handleSearch} />
 
-        {/* Temporary check that the round-trip to our backend works. In the
-            next step we replace this with a proper profile card and add
-            loading and error states. */}
-        {profile && (
-          <p>
-            Found: <strong>{profile.login}</strong> ({profile.public_repos}{" "}
-            public repos)
-          </p>
-        )}
+        {/* While waiting, show the loading skeleton. Once we have a profile
+            (and are no longer loading), show the profile card. */}
+        {loading && <Loader />}
+        {!loading && profile && <UserProfile profile={profile} />}
       </main>
     </div>
   );

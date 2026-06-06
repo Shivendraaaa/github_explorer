@@ -122,6 +122,103 @@ body {
 }
 
 /* ---------------------------------------------------------------------------
+   Profile card
+   A surface (white card) with the avatar beside the user's details.
+   --------------------------------------------------------------------------- */
+.profile {
+  display: flex;
+  gap: var(--space-lg);
+  padding: var(--space-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.profile-avatar {
+  border-radius: 50%; /* make the square image a circle */
+  flex-shrink: 0; /* never let the avatar get squashed */
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-width: 0; /* lets long text wrap instead of overflowing the card */
+}
+
+.profile-name {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.profile-login {
+  margin: 0;
+  color: var(--color-muted);
+}
+
+.profile-bio {
+  margin: var(--space-xs) 0 0;
+}
+
+.profile-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  margin: var(--space-sm) 0 0;
+  padding: 0;
+  list-style: none; /* remove the default bullet points */
+  color: var(--color-muted);
+}
+
+/* ---------------------------------------------------------------------------
+   Loading skeleton
+   Grey shapes (reusing the profile layout) that gently pulse while loading.
+   --------------------------------------------------------------------------- */
+.skeleton-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--color-border);
+}
+
+.skeleton-line {
+  height: 14px;
+  border-radius: 6px;
+  background: var(--color-border);
+}
+
+.skeleton-line-lg {
+  width: 60%;
+  height: 20px;
+}
+
+.skeleton-line-md {
+  width: 40%;
+}
+
+.skeleton-line-sm {
+  width: 75%;
+}
+
+/* The pulse: fade the grey shapes in and out to signal activity. */
+.skeleton .skeleton-avatar,
+.skeleton .skeleton-line {
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+/* ---------------------------------------------------------------------------
    Small screens
    On phones, shrink the heading and padding slightly so nothing feels
    cramped.
@@ -133,5 +230,16 @@ body {
 
   .app-title {
     font-size: 1.6rem;
+  }
+
+  /* Stack the profile vertically on small screens so it isn't cramped. */
+  .profile {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .profile-stats {
+    justify-content: center;
   }
 }
