@@ -13,7 +13,7 @@ from GitHub's rate limit, and gives the frontend a stable, predictable API.
 
 ## Live demo
 
-- Frontend: _https://your-frontend.vercel.app_ (placeholder — added after deployment)
+- Frontend: https://github-explorer-q7aw.vercel.app/ (placeholder — added after deployment)
 - Backend: _https://your-backend.onrender.com_ (placeholder — added after deployment)
 
 ## Features
